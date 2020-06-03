@@ -1,0 +1,9 @@
+syntax = "proto3";
+package pb;
+
+message Task {
+    string uuid = 1;
+    string finisheduuid = 2;
+    int32 state = 3; // 0 - not started, 1 - in progress, 2 - finished
+    int32 id = 4;
+}

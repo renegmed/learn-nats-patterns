@@ -1,0 +1,6 @@
+syntax = "proto3";
+package pb;
+
+message DiscoverableServiceTransport {
+    string Address = 1;
+}

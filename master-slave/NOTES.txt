@@ -1,0 +1,7 @@
+Status: wip
+
+Article: Practical Golang: Getting Started With NATS and Related Patterns 
+URL: https://dzone.com/articles/practical-golang-getting-started-with-nats-and-rel
+
+The apps are working but not communicating with each other.
+Need to fix it.

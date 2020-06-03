@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+    # docker image configuration is found here 
+    # https://github.com/nats-io/nats-docker/blob/6fb8c05311bb4d1554390f66abb0a5ebef1e1c9d/2.1.0/scratch/amd64/nats-server.conf#L13-L19
+    nats:
+        container_name: "nats_1"
+        image: nats:latest
+        expose:
+            - "4222"       
+        ports:
+            - "8222:8222"
+    nats2:
+        container_name: "nats_2"
+        image: nats:latest
+        command: "--port 4223 --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    nats3:
+        container_name: "nats_3"
+        image: nats:latest
+        command: "--port 4224 --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+     
+    master:
+        container_name: master
+        build: 
+          context: ./master 
+        depends_on:
+          - nats
+        ports:
+          - 4100:4100
+        environment: 
+          NATS_SERVER_ADDR: nats://172.26.0.2:4223,nats://172.26.0.3:4224,nats://172.26.0.4:4222
+          CLIENT_ID: master-1
+          SERVER_PORT: 4100 
+    fileserver:
+        container_name: fileserver
+        build: 
+          context: ./fileserver 
+        depends_on:
+          - nats
+        ports:
+          - 4200:4200
+        environment: 
+          NATS_SERVER_ADDR: nats://172.26.0.2:4223,nats://172.26.0.3:4224,nats://172.26.0.4:4222
+          CLIENT_ID: fileserver-1
+          SERVER_PORT: 4200 
+          TRANSPORT_URL: http://localhost:4100
+          
+    worker1:
+      container_name: worker1
+      build: 
+        context: ./worker1
+      depends_on:
+        - nats
+      ports:
+        - 4300:4300
+      environment: 
+        NATS_SERVER_ADDR: nats://172.26.0.2:4223,nats://172.26.0.3:4224,nats://172.26.0.4:4222
+        CLIENT_ID: worker-1
+        SERVER_PORT: 4300  
+    
+networks:
+    default:
+        driver: bridge
+             

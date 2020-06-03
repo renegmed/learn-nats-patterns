@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+    # docker image configuration is found here 
+    # https://github.com/nats-io/nats-docker/blob/6fb8c05311bb4d1554390f66abb0a5ebef1e1c9d/2.1.0/scratch/amd64/nats-server.conf#L13-L19
+    nats:
+        container_name: "nats_1"
+        image: nats:latest
+        expose:
+            - "4222"       
+        ports:
+            - "8222:8222"
+    nats2:
+        container_name: "nats_2"
+        image: nats:latest
+        command: "--port 4223 --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    nats3:
+        container_name: "nats_3"
+        image: nats:latest
+        command: "--port 4224 --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+     
+    requester:
+        container_name: requester
+        build: 
+          context: ./requester 
+        depends_on:
+          - nats
+        ports:
+          - 3100:3100
+        environment:
+          #SUBJECT: curious 
+          NATS_SERVER_ADDR: nats://172.25.0.2:4222,nats://172.25.0.3:4224,nats://172.25.0.4:4223
+          CLIENT_ID: requester-1
+          SERVER_PORT: 3100 
+    
+    provider1:
+      container_name: provider1
+      build: 
+        context: ./usersprovider 
+      depends_on:
+        - nats
+      environment:
+        SUBJECT: UserNameById 
+        NATS_SERVER_ADDR: nats://172.25.0.2:4222,nats://172.25.0.3:4224,nats://172.25.0.4:4223
+        CLIENT_ID: provider1
+        SERVER_PORT: 3200 
+
+    provider2:
+      container_name: provider2
+      build: 
+        context: ./timeprovider 
+      depends_on:
+        - nats
+      environment:
+        SUBJECT: TimeTeller 
+        NATS_SERVER_ADDR: nats://172.25.0.2:4222,nats://172.25.0.3:4224,nats://172.25.0.4:4223
+        CLIENT_ID: provider2
+        SERVER_PORT: 3300 
+networks:
+    default:
+        driver: bridge
+             

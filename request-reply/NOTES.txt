@@ -1,0 +1,23 @@
+Status: wip
+
+Article: Practical Golang: Getting Started With NATS and Related Patterns 
+URL: https://dzone.com/articles/practical-golang-getting-started-with-nats-and-rel
+
+
+Request/Reply
+
+    $ cd request-reply
+
+    $ make up
+
+    $ make tail-req (at new terminal)
+
+    $ make tail-prov1 (at new terminal)
+
+    $ make tail-prov2 (at new terminal)
+
+Post a request
+    $ make get 
+
+
+NOTE: at this time, request-reply is not completely working. Requester is getting timeout when calling providers

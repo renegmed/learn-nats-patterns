@@ -1,0 +1,22 @@
+Status: wip
+
+Article: Practical Golang: Getting Started With NATS and Related Patterns 
+URL: https://dzone.com/articles/practical-golang-getting-started-with-nats-and-rel
+
+The apps are working but not communicating with each other.
+Need to fix it.
+
+To run:
+
+1. Build and deploy nats servers, dispatcher and receiver components
+
+    $ make up
+
+2. Monitory dispatcher (open new terminal)
+
+    $ make tail-dispatcher
+
+3. Monitor reiver (open new terminal)
+
+    $ make tail-receiver 
+

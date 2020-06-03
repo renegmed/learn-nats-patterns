@@ -19,6 +19,28 @@ services:
         image: nats:latest
         command: "--port 4224 --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
      
+    dispatcher:
+        container_name: dispatcher
+        build: 
+          context: ./dispatcher 
+        depends_on:
+          - nats
+        environment:              
+          NATS_SERVER_ADDR: nats://172.27.0.2:4222,nats://172.27.0.3:4224,nats://172.27.0.4:4223
+          CLIENT_ID: dispatcher-1
+          SERVER_PORT: 4100
+
+
+    receiver:
+        container_name: receiver
+        build: 
+          context: ./receiver 
+        depends_on:
+          - nats
+        environment:              
+          NATS_SERVER_ADDR: nats://172.27.0.2:4222,nats://172.27.0.3:4224,nats://172.27.0.4:4223
+          CLIENT_ID: receiver-1
+          SERVER_PORT: 4200      
 
 networks:
     default:

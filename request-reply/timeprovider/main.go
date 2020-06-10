@@ -30,13 +30,14 @@ func replyWithTime(m *nats.Msg) {
 	}
 
 	log.Printf("Replying to %v\n%v\n", m.Reply, curTime)
-	nc.Publish(m.Reply, data)
+	//nc.Publish(m.Reply, data)
+	m.Respond(data)
 }
 
 func main() {
 
 	subject := os.Getenv("SUBJECT")
-	clientID := os.Getenv("CLIENT_NAME")
+	clientID := os.Getenv("CLIENT_ID")
 	natsServers := os.Getenv("NATS_SERVER_ADDR")
 	serverPort := os.Getenv("SERVER_PORT")
 

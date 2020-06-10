@@ -22,7 +22,7 @@ func replyWithUserId(m *nats.Msg) {
 	myUser := pb.User{}
 	err := proto.Unmarshal(m.Data, &myUser)
 	if err != nil {
-		log.Println("Problem unmarshaling user data.", err)
+		log.Println("Problem unmarshalling user data.", err)
 		return
 	}
 
@@ -37,7 +37,8 @@ func replyWithUserId(m *nats.Msg) {
 	}
 
 	log.Printf("Replying to %v\n%v\n", m.Reply, myUser)
-	nc.Publish(m.Reply, data)
+	//nc.Publish(m.Reply, data)
+	m.Respond(data)
 }
 
 func main() {
@@ -48,7 +49,7 @@ func main() {
 	users["4"] = "Kate"
 
 	subject := os.Getenv("SUBJECT")
-	clientID := os.Getenv("CLIENT_NAME")
+	clientID := os.Getenv("CLIENT_ID")
 	natsServers := os.Getenv("NATS_SERVER_ADDR")
 	serverPort := os.Getenv("SERVER_PORT")
 

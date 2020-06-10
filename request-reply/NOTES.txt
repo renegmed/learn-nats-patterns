@@ -1,4 +1,4 @@
-Status: wip
+Status: WORKING
 
 Article: Practical Golang: Getting Started With NATS and Related Patterns 
 URL: https://dzone.com/articles/practical-golang-getting-started-with-nats-and-rel

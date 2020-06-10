@@ -36,7 +36,7 @@ func handleUserWithTime(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("Requesting user userNameById data,", myUser)
 
-		msg, err := nc.Request("UserNameById", data, 2000*time.Millisecond)
+		msg, err := nc.Request("UserNameById", data, 4000*time.Millisecond)
 		if err != nil {
 			log.Println("Problem requesting user data.", err)
 			//w.WriteHeader(500)
@@ -44,7 +44,7 @@ func handleUserWithTime(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if msg != nil {
+		if msg == nil {
 			log.Println("Problem, no message from user data provider.")
 			//w.WriteHeader(500)
 			http.Error(w, fmt.Sprintf("Problem, no message from user data provider. %v", err), 500)
@@ -59,13 +59,13 @@ func handleUserWithTime(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		myUser = myUserWithName
-		log.Println("Got from data provider, ", myUser)
+		log.Println("+++++ Got from data provider, ", myUser)
 
 	}()
 
 	go func() {
 		defer wg.Done()
-		msg, err := nc.Request("TimeTeller", nil, 2000*time.Millisecond)
+		msg, err := nc.Request("TimeTeller", nil, 4000*time.Millisecond)
 		if err != nil {
 			log.Println("Problem requesting time teller data.", err)
 			http.Error(w, fmt.Sprintf("Problem on requesting time teller data.", err), 500)
@@ -88,7 +88,7 @@ func handleUserWithTime(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		curTime = receivedTime
-		log.Println("Got from time teller, ", curTime)
+		log.Println("++++ Got from time teller, ", curTime)
 	}()
 
 	wg.Wait()

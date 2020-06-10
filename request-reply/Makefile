@@ -14,8 +14,17 @@ get:
 
 tail-req:
 	docker logs requester -f
-tail-prov1:
+tail-user:
 	docker logs provider1 -f
-tail-prov2:
+tail-time:
 	docker logs provider2 -f
 .PHONY: tail-req tail-prov1 tail-prov2
+
+req1:
+	curl http://localhost:3100/1
+
+req2:
+	curl http://localhost:3100/2
+
+req3:
+	curl http://localhost:3100/3

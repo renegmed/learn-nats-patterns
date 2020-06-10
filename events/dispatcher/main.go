@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	nats "github.com/nats-io/nats.go"
-	natsp "github.com/nats-io/nats.go/encoders/protobuf"
 	"github.com/renegmed/nats-patterns-events/dispatcher/pb"
 )
 
@@ -29,30 +29,49 @@ func main() {
 
 	nc := connector.NATS()
 
-	ec, err := nats.NewEncodedConn(nc, natsp.PROTOBUF_ENCODER)
+	// automatically encode our structs into raw data. We’ll use the protobuff one,
+	// but there are a default one, a gob one and a JSON one too
+	// 	natsp "github.com/nats-io/nats.go/encoders/protobuf"
+	//ec, err := nats.NewEncodedConn(nc, natsp.PROTOBUF_ENCODER) // "protobuf"
+	ec, err := nats.NewEncodedConn(nc, "json")
 	defer ec.Close()
 
-	for i := 0; i < 5; i++ {
-		myMessage := pb.TextMessage{Id: int32(i), Body: "Hello over standard!"}
+	messages := []string{"Hello there!", "How are you?", "Anything new?", "How are you doing?", "What's up"}
 
-		err := ec.Publish("Messaging.Text.Standard", &myMessage)
-		if err != nil {
-			log.Println("Error on publishing messasging text standard, ", err)
-		}
+	var wg = sync.WaitGroup{}
+
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			myMessage := pb.TextMessage{Id: int32(i), Body: messages[i]} //"Hello over standard!"}
+
+			//log.Println("++++++ myMessage:\n", myMessage)
+
+			err := ec.Publish("Messaging.Text.Standard", &myMessage)
+			if err != nil {
+				log.Println("Error on publishing messasging text standard, ", err)
+			}
+		}(i)
 	}
 
 	for i := 5; i < 10; i++ {
-		myMessage := pb.TextMessage{Id: int32(i), Body: "Hello, please respond!"}
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			myMessage := pb.TextMessage{Id: int32(i), Body: messages[i-5] + " Please respond!"} //"Hello, please respond!"}
 
-		res := pb.TextMessage{}
-		err := ec.Request("Messaging.Text.Respond", &myMessage, &res, 200*time.Millisecond)
-		if err != nil {
-			log.Println("Error on requesting messaging text respond, ", err)
-		}
+			res := pb.TextMessage{}
+			err := ec.Request("Messaging.Text.Respond", &myMessage, &res, 4000*time.Millisecond)
+			if err != nil {
+				log.Println("Error on requesting messaging text respond, ", err)
+			}
 
-		fmt.Println(res.Body, " with id ", res.Id)
-
+			fmt.Println(res.Body, " with id ", res.Id)
+		}(i)
 	}
+
+	wg.Wait()
 
 	sendChannel := make(chan *pb.TextMessage)
 	ec.BindSendChan("Messaging.Text.Channel", sendChannel)

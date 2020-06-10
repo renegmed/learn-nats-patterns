@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	nats "github.com/nats-io/nats.go"
-	natsp "github.com/nats-io/nats.go/encoders/protobuf"
 	"github.com/renegmed/nats-patterns-events/receiver/pb"
 )
 
@@ -26,28 +26,33 @@ func main() {
 
 	nc := connector.NATS()
 
-	ec, err := nats.NewEncodedConn(nc, natsp.PROTOBUF_ENCODER)
+	// automatically encode our structs into raw data. We’ll use the protobuff one,
+	// but there are a default one, a gob one and a JSON one too
+	//    natsp "github.com/nats-io/nats.go/encoders/protobuf"
+	// ec, err := nats.NewEncodedConn(nc, natsp.PROTOBUF_ENCODER)
+	ec, err := nats.NewEncodedConn(nc, "json")
 	if err != nil {
 		log.Fatal("Error on creating encoded connection, ", err)
 	}
 	defer ec.Close()
 
 	ec.Subscribe("Messaging.Text.Standard", func(m *pb.TextMessage) {
-		log.Println("Got standard message: \"", m.Body, "\" with the Id ", m.Id, ".")
+		log.Println("^^^^^^^ Got standard message: \"", m.Body, "\" with the Id ", m.Id, ".")
 	})
 
 	ec.Subscribe("Messaging.Text.Respond", func(subject, reply string, m *pb.TextMessage) {
-		log.Println("Got ask for response message: \"", m.Body, "\" with the Id ", m.Id, ".")
+		log.Println("::::::: Got ask for response message: \"", m.Body, "\" with the Id ", m.Id, ".")
 
-		newMessage := pb.TextMessage{Id: m.Id, Body: "Responding!"}
+		newMessage := pb.TextMessage{Id: m.Id, Body: "Responding to question - " + strings.TrimSuffix(m.Body, " Please respond!")}
 		ec.Publish(reply, &newMessage)
+
 	})
 
 	receiveChannel := make(chan *pb.TextMessage)
 	ec.BindRecvChan("Messaging.Text.Channel", receiveChannel)
 
 	for m := range receiveChannel {
-		log.Println("Got channel'ed message: \"", m.Body, "\" with the Id ", m.Id, ".")
+		log.Println("....Got channeled message: \"", m.Body, "\" with the Id ", m.Id, ".")
 	}
 
 	log.Println("End of the application.")

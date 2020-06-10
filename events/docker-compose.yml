@@ -26,7 +26,7 @@ services:
         depends_on:
           - nats
         environment:              
-          NATS_SERVER_ADDR: nats://172.27.0.2:4222,nats://172.27.0.3:4224,nats://172.27.0.4:4223
+          NATS_SERVER_ADDR: nats://172.23.0.2:4222,nats://172.23.0.3:4223,nats://172.23.0.4:4224
           CLIENT_ID: dispatcher-1
           SERVER_PORT: 4100
 
@@ -38,7 +38,7 @@ services:
         depends_on:
           - nats
         environment:              
-          NATS_SERVER_ADDR: nats://172.27.0.2:4222,nats://172.27.0.3:4224,nats://172.27.0.4:4223
+          NATS_SERVER_ADDR: nats://172.23.0.2:4222,nats://172.23.0.3:4223,nats://172.23.0.4:4224
           CLIENT_ID: receiver-1
           SERVER_PORT: 4200      
 

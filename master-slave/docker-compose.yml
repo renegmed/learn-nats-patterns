@@ -28,7 +28,7 @@ services:
         ports:
           - 4100:4100
         environment: 
-          NATS_SERVER_ADDR: nats://172.26.0.2:4223,nats://172.26.0.3:4224,nats://172.26.0.4:4222
+          NATS_SERVER_ADDR: nats://172.24.0.2:4222,nats://172.24.0.3:4224,nats://172.24.0.4:4223
           CLIENT_ID: master-1
           SERVER_PORT: 4100 
     fileserver:
@@ -37,13 +37,16 @@ services:
           context: ./fileserver 
         depends_on:
           - nats
+        expose:
+          - 4200
         ports:
           - 4200:4200
         environment: 
-          NATS_SERVER_ADDR: nats://172.26.0.2:4223,nats://172.26.0.3:4224,nats://172.26.0.4:4222
+          NATS_SERVER_ADDR: nats://172.24.0.2:4222,nats://172.24.0.3:4224,nats://172.24.0.4:4223
           CLIENT_ID: fileserver-1
           SERVER_PORT: 4200 
-          TRANSPORT_URL: http://localhost:4100
+          # transport url should be based on service name i.e fileserver
+          TRANSPORT_URL: http://fileserver:4200
           
     worker1:
       container_name: worker1
@@ -54,7 +57,7 @@ services:
       ports:
         - 4300:4300
       environment: 
-        NATS_SERVER_ADDR: nats://172.26.0.2:4223,nats://172.26.0.3:4224,nats://172.26.0.4:4222
+        NATS_SERVER_ADDR: nats://172.24.0.2:4222,nats://172.24.0.3:4224,nats://172.24.0.4:4223
         CLIENT_ID: worker-1
         SERVER_PORT: 4300  
     

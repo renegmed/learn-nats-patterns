@@ -1,7 +1,13 @@
-Status: wip
+Status: WORKING
 
 Article: Practical Golang: Getting Started With NATS and Related Patterns 
 URL: https://dzone.com/articles/practical-golang-getting-started-with-nats-and-rel
 
-The apps are working but not communicating with each other.
-Need to fix it.
+
+To get the correct nats urls, do 
+
+    $ make cluster-info
+
+ and get the three urls and update the docker-compose.yml
+
+

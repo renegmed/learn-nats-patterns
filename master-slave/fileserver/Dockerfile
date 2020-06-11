@@ -1,14 +1,19 @@
-FROM golang:1.14.0-alpine
+FROM golang:1.14.1-alpine as builder
 
-WORKDIR src/fileserver
+WORKDIR /app
 
 COPY . .
  
 RUN go mod vendor
-
 RUN go build -o fileserver .
-
-RUN pwd
-RUN ls -als
  
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copy the Pre-built binary file from the previous stage. Observe we also copied the .env file
+COPY --from=builder /app/fileserver .
+ 
+
 ENTRYPOINT ["./fileserver"]

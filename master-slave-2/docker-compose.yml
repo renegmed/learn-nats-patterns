@@ -1,0 +1,97 @@
+version: '3'
+
+services:
+    # docker image configuration is found here 
+    # https://github.com/nats-io/nats-docker/blob/6fb8c05311bb4d1554390f66abb0a5ebef1e1c9d/2.1.0/scratch/amd64/nats-server.conf#L13-L19
+    # nats:
+    #     container_name: "nats_1"
+    #     image: nats:latest
+    #     expose:
+    #         - "4222"       
+    #     ports:
+    #         - "8222:8222"
+    # nats2:
+    #     container_name: "nats_2"
+    #     image: nats:latest
+    #     command: "--port 4223 --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    # nats3:
+    #     container_name: "nats_3"
+    #     image: nats:latest
+    #     command: "--port 4224 --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+
+    kvstore:
+        container_name: kvstore
+        build: 
+          context: ./keyvaluestore 
+        # depends_on:
+        #   - nats
+        ports:
+          - 3000:3000
+        environment:  
+          SERVER_PORT: 3000
+ 
+    database:
+        container_name: database
+        build: 
+          context: ./database 
+        depends_on:
+          - kvstore
+        ports:
+          - 4000:4000
+        environment:  
+          SERVER_PORT: 4000
+          KV_STORE_ADDRESS: kvstore:3000
+          DATABASE_ADDRESS: database:4000 
+
+    storage:
+        container_name: storage
+        build: 
+          context: ./storage 
+        depends_on:
+          - database
+        ports:
+            - 5000:5000 
+        environment: 
+          SERVER_PORT: 5000  
+          STORAGE_ADDRESS: storage:5000
+          KV_STORE_ADDRESS: kvstore:3000
+ 
+    master:
+        container_name: master
+        build: 
+          context: ./master 
+        depends_on:
+          - storage
+        ports:
+          - 6000:6000 
+        environment:  
+          MASTER_ADDRESS: master:6000
+          KV_STORE_ADDRESS: kvstore:3000
+ 
+    worker:
+        container_name: worker
+        build: 
+          context: ./worker 
+        depends_on:
+          - master
+        environment:  
+          THREAD_COUNT: 5
+          KV_STORE_ADDRESS: kvstore:3000
+          MASTER_ADDRESS: master:6000 
+
+    frontend:
+        container_name: frontend
+        build: 
+          context: ./frontend 
+        depends_on:
+          - worker
+        ports:
+          - 8000:8000 
+        environment: 
+          SERVER_PORT: 8000    
+          KV_STORE_ADDRESS: kvstore:3000   
+
+networks:
+    default:
+        driver: bridge
+ 
